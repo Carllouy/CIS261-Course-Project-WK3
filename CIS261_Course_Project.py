@@ -1,4 +1,4 @@
-#Carl Louy, CIS261, Create and call functions with parameters
+#Carl Louy, CIS261, Create and call functions with parameters lab
  
 total_Employees = 0
 total_Hours = 0.0
