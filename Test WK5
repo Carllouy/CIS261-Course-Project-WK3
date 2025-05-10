@@ -1,6 +1,6 @@
 from datetime import datetime
 
-# Initialize global data structures
+# === Global Data Structures ===
 employee_records = []
 totals_dict = {
     'total_Employees': 0,
@@ -10,20 +10,27 @@ totals_dict = {
     'total_Net_Pay': 0.0
 }
 
-def get_Date_Range():
-    while True:
-        try:
-            from_date = input("Enter FROM date (mm/dd/yyyy): ")
-            datetime.strptime(from_date, "%m/%d/%Y")
-            to_date = input("Enter TO date (mm/dd/yyyy): ")
-            datetime.strptime(to_date, "%m/%d/%Y")
-            return from_date, to_date
-        except ValueError:
-            print("Invalid date format. Please use mm/dd/yyyy.")
+# === Input Functions ===
 
 def get_Employee_Name():
     name = input("Enter employee name (or 'End' to finish): ")
     return name
+
+def get_Date_Range():
+    while True:
+        try:
+            from_date = input("Enter FROM date (mm/dd/yyyy): ")
+            from_dt = datetime.strptime(from_date, "%m/%d/%Y")
+            to_date = input("Enter TO date (mm/dd/yyyy): ")
+            to_dt = datetime.strptime(to_date, "%m/%d/%Y")
+
+            if from_dt > to_dt:
+                print("FROM date cannot be after TO date.")
+                continue
+
+            return from_date, to_date
+        except ValueError:
+            print("Invalid date format. Please use mm/dd/yyyy.")
 
 def get_Total_Hours():
     while True:
@@ -48,6 +55,8 @@ def get_Income_Tax_Rate():
             return tax_rate
         except ValueError:
             print("Invalid input. Please enter a decimal.")
+
+# === Calculation and Display ===
 
 def calculate_Pay(hours, rate, tax_rate):
     gross_pay = hours * rate
@@ -76,19 +85,19 @@ def display_Totals(totals):
     print(f"Total Net Pay: ${totals['total_Net_Pay']:.2f}")
     print("========================\n")
 
-# Main data collection loop
-while True:
-    from_date, to_date = get_Date_Range()
+# === Main Data Collection Loop ===
 
+while True:
     name = get_Employee_Name()
     if name.lower() == "end":
         break
 
+    from_date, to_date = get_Date_Range()
     hours = get_Total_Hours()
     rate = get_Hourly_Rate()
     tax_rate = get_Income_Tax_Rate()
 
-    # Store employee data in a list of dicts
+    # Store employee data
     employee_records.append({
         'from_date': from_date,
         'to_date': to_date,
@@ -98,28 +107,31 @@ while True:
         'tax_rate': tax_rate
     })
 
-# After loop: process records
-for record in employee_records:
-    gross, tax, net = calculate_Pay(record['hours'], record['rate'], record['tax_rate'])
-    
-    display_Employee_Info(
-        record['from_date'],
-        record['to_date'],
-        record['name'],
-        record['hours'],
-        record['rate'],
-        gross,
-        record['tax_rate'],
-        tax,
-        net
-    )
+# === Post-Processing and Reporting ===
 
-    # Update totals dictionary
-    totals_dict['total_Employees'] += 1
-    totals_dict['total_Hours'] += record['hours']
-    totals_dict['total_Gross_Pay'] += gross
-    totals_dict['total_Tax'] += tax
-    totals_dict['total_Net_Pay'] += net
+if not employee_records:
+    print("\nNo employee data was entered.")
+else:
+    for record in employee_records:
+        gross, tax, net = calculate_Pay(record['hours'], record['rate'], record['tax_rate'])
 
-# Final summary
-display_Totals(totals_dict)
+        display_Employee_Info(
+            record['from_date'],
+            record['to_date'],
+            record['name'],
+            record['hours'],
+            record['rate'],
+            gross,
+            record['tax_rate'],
+            tax,
+            net
+        )
+
+        # Update totals dictionary
+        totals_dict['total_Employees'] += 1
+        totals_dict['total_Hours'] += record['hours']
+        totals_dict['total_Gross_Pay'] += gross
+        totals_dict['total_Tax'] += tax
+        totals_dict['total_Net_Pay'] += net
+
+    display_Totals(totals_dict)
