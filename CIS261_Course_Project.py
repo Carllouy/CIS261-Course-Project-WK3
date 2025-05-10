@@ -2,8 +2,8 @@
  
 from datetime import datetime
 
-employee_records = []
-totals_dict = {
+employee_Records = []
+totals_Dict = {
     'total_Employees': 0,
     'total_Hours': 0.0,
     'total_Gross_Pay': 0.0,
@@ -95,7 +95,7 @@ while True:
     rate = get_Hourly_Rate()
     tax_rate = get_Income_Tax_Rate()
 
-    employee_records.append({
+    employee_Records.append({
         'from_date': from_date,
         'to_date': to_date,
         'name': name,
@@ -105,10 +105,10 @@ while True:
     })
 
 
-if not employee_records:
+if not employee_Records:
     print("\nNo employee data was entered.")
 else:
-    for record in employee_records:
+    for record in employee_Records:
         gross, tax, net = calculate_Pay(record['hours'], record['rate'], record['tax_rate'])
 
         display_Employee_Info(
@@ -123,10 +123,10 @@ else:
             net
         )
 
-        totals_dict['total_Employees'] += 1
-        totals_dict['total_Hours'] += record['hours']
-        totals_dict['total_Gross_Pay'] += gross
-        totals_dict['total_Tax'] += tax
-        totals_dict['total_Net_Pay'] += net
+        totals_Dict['total_Employees'] += 1
+        totals_Dict['total_Hours'] += record['hours']
+        totals_Dict['total_Gross_Pay'] += gross
+        totals_Dict['total_Tax'] += tax
+        totals_Dict['total_Net_Pay'] += net
 
-    display_Totals(totals_dict)
+    display_Totals(totals_Dict)
