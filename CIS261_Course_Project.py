@@ -1,70 +1,66 @@
-#Carl Louy, CIS261, Course project WK5
+#Carl Louy, CIS261, Course project WK7
  
+
+import csv
 from datetime import datetime
 
-employee_Records = []
-totals_Dict = {
-    'total_Employees': 0,
-    'total_Hours': 0.0,
-    'total_Gross_Pay': 0.0,
-    'total_Tax': 0.0,
-    'total_Net_Pay': 0.0
+# Constants
+FILE_NAME = 'employee_data.txt'
+TAX_RATE_PROMPT = "Enter income tax rate (e.g., 0.2 for 20%): "
+
+# Data Structures
+totals = {
+    'total_employees': 0,
+    'total_hours': 0.0,
+    'total_gross_pay': 0.0,
+    'total_tax': 0.0,
+    'total_net_pay': 0.0
 }
 
+# Functions
+def get_employee_name():
+    """Prompt user to enter employee name."""
+    return input("Enter employee name (or 'End' to finish): ")
 
-def get_Employee_Name():
-    name = input("Enter employee name (or 'End' to finish): ")
-    return name
-
-def get_Date_Range():
+def get_date_range():
+    """Prompt user to enter a valid date range."""
     while True:
         try:
             from_date = input("Enter FROM date (mm/dd/yyyy): ")
-            from_dt = datetime.strptime(from_date, "%m/%d/%Y")
             to_date = input("Enter TO date (mm/dd/yyyy): ")
+            from_dt = datetime.strptime(from_date, "%m/%d/%Y")
             to_dt = datetime.strptime(to_date, "%m/%d/%Y")
-
             if from_dt > to_dt:
                 print("FROM date cannot be after TO date.")
                 continue
-
             return from_date, to_date
         except ValueError:
             print("Invalid date format. Please use mm/dd/yyyy.")
 
-def get_Total_Hours():
+def get_float_input(prompt):
+    """Prompt user to enter a valid float value."""
     while True:
         try:
-            hours = float(input("Enter total hours worked: "))
-            return hours
+            return float(input(prompt))
         except ValueError:
             print("Invalid input. Please enter a number.")
 
-def get_Hourly_Rate():
-    while True:
-        try:
-            rate = float(input("Enter hourly rate: "))
-            return rate
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-
-def get_Income_Tax_Rate():
-    while True:
-        try:
-            tax_rate = float(input("Enter income tax rate (e.g., 0.2 for 20%): "))
-            return tax_rate
-        except ValueError:
-            print("Invalid input. Please enter a decimal.")
-
-
-def calculate_Pay(hours, rate, tax_rate):
+def calculate_pay(hours, rate, tax_rate):
+    """Calculate gross pay, tax, and net pay."""
     gross_pay = hours * rate
     income_tax = gross_pay * tax_rate
     net_pay = gross_pay - income_tax
     return gross_pay, income_tax, net_pay
 
-def display_Employee_Info(from_date, to_date, name, hours, rate, gross, tax_rate, tax, net):
-    print("\n--- Employee Pay Details ---")
+def write_employee_record(record):
+    """Append employee record to the text file."""
+    with open(FILE_NAME, 'a', newline='') as file:
+        writer = csv.writer(file, delimiter='|')
+        writer.writerow(record)
+
+def display_employee_info(from_date, to_date, name, hours, rate, gross, tax_rate, tax, net):
+    """Display detailed information for an employee."""
+    print(f"\n--- Employee Pay Details ---")
     print(f"Date Range: {from_date} to {to_date}")
     print(f"Name: {name}")
     print(f"Hours Worked: {hours}")
@@ -75,58 +71,62 @@ def display_Employee_Info(from_date, to_date, name, hours, rate, gross, tax_rate
     print(f"Net Pay: ${net:.2f}")
     print("-----------------------------\n")
 
-def display_Totals(totals):
+def display_totals(totals):
+    """Display payroll summary."""
     print("\n=== Payroll Summary ===")
-    print(f"Total Employees: {totals['total_Employees']}")
-    print(f"Total Hours: {totals['total_Hours']}")
-    print(f"Total Gross Pay: ${totals['total_Gross_Pay']:.2f}")
-    print(f"Total Tax: ${totals['total_Tax']:.2f}")
-    print(f"Total Net Pay: ${totals['total_Net_Pay']:.2f}")
+    print(f"Total Employees: {totals['total_employees']}")
+    print(f"Total Hours: {totals['total_hours']}")
+    print(f"Total Gross Pay: ${totals['total_gross_pay']:.2f}")
+    print(f"Total Tax: ${totals['total_tax']:.2f}")
+    print(f"Total Net Pay: ${totals['total_net_pay']:.2f}")
     print("========================\n")
 
+def read_employee_records(from_date):
+    """Read employee records from the text file."""
+    with open(FILE_NAME, 'r') as file:
+        reader = csv.reader(file, delimiter='|')
+        for row in reader:
+            record_from_date = row[0]
+            if from_date == "All" or record_from_date == from_date:
+                yield row
 
+# Main Program
 while True:
-    name = get_Employee_Name()
-    if name.lower() == "end":
+    name = get_employee_name()
+    if name.lower() == 'end':
         break
 
-    from_date, to_date = get_Date_Range()
-    hours = get_Total_Hours()
-    rate = get_Hourly_Rate()
-    tax_rate = get_Income_Tax_Rate()
+    from_date, to_date = get_date_range()
+    hours = get_float_input("Enter total hours worked: ")
+    rate = get_float_input("Enter hourly rate: ")
+    tax_rate = get_float_input(TAX_RATE_PROMPT)
 
-    employee_Records.append({
-        'from_date': from_date,
-        'to_date': to_date,
-        'name': name,
-        'hours': hours,
-        'rate': rate,
-        'tax_rate': tax_rate
-    })
+    record = [from_date, to_date, name, hours, rate, tax_rate]
+    write_employee_record(record)
 
+if input("\nWould you like to generate a report? (y/n): ").lower() == 'y':
+    while True:
+        from_date_input = input("Enter the 'From Date' for the report (mm/dd/yyyy) or 'All' for all records: ")
+        try:
+            if from_date_input != "All":
+                datetime.strptime(from_date_input, "%m/%d/%Y")
+            break
+        except ValueError:
+            print("Invalid date format. Please use mm/dd/yyyy.")
 
-if not employee_Records:
-    print("\nNo employee data was entered.")
-else:
-    for record in employee_Records:
-        gross, tax, net = calculate_Pay(record['hours'], record['rate'], record['tax_rate'])
+    for row in read_employee_records(from_date_input):
+        from_date, to_date, name, hours, rate, tax_rate = row
+        hours = float(hours)
+        rate = float(rate)
+        tax_rate = float(tax_rate)
+        gross, tax, net = calculate_pay(hours, rate, tax_rate)
 
-        display_Employee_Info(
-            record['from_date'],
-            record['to_date'],
-            record['name'],
-            record['hours'],
-            record['rate'],
-            gross,
-            record['tax_rate'],
-            tax,
-            net
-        )
+        display_employee_info(from_date, to_date, name, hours, rate, gross, tax_rate, tax, net)
 
-        totals_Dict['total_Employees'] += 1
-        totals_Dict['total_Hours'] += record['hours']
-        totals_Dict['total_Gross_Pay'] += gross
-        totals_Dict['total_Tax'] += tax
-        totals_Dict['total_Net_Pay'] += net
+        totals['total_employees'] += 1
+        totals['total_hours'] += hours
+        totals['total_gross_pay'] += gross
+        totals['total_tax'] += tax
+        totals['total_net_pay'] += net
 
-    display_Totals(totals_Dict)
+    display_totals(totals)
